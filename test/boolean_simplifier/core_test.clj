@@ -11,4 +11,5 @@
    (bs/simplify '[:and [:not zero?] zero?]) => false
    (bs/simplify '[:or zero? [:not zero?]]) => true
    (bs/simplify '[:or [:not zero?] zero?]) => true
-   (bs/simplify '[:and [:or int?] int?]) => 'int?))
+   (bs/simplify '[:and [:or int?] int?]) => 'int?
+   (bs/simplify '[:and [:or int? bool?] [:or bool? int?]]) => '[:or int? bool?]))
