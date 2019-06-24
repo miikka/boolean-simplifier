@@ -4,7 +4,8 @@ A stupid worse-is-better library for simplifying Boolean expressions. Example:
 
 ```clojure
 (require '[boolean-simplifier.core :as bs])
-(bs/simplify '[:and int? [:and int? pos?]]) ; => [:and int? pos?]
+(bs/simplify '[:and int? [:and int? pos?]])
+;; => [:and int? pos?]
 ```
 
 The input language:
@@ -20,6 +21,14 @@ It is based on the following rules:
 * When evaluating `b` in `[:and a b]`, we know that `a` is true.
 * When evaluating `b` in `[:or a b]`, we know that `a` is false.
 * `[:not [:not x]]` is equivalent to `x`
+
+The library does *not* use the distributive law. Example:
+
+```clojure
+(bs/simplify '[:or [:and int? pos?] [:and int? neg?]])
+;; => [:or [:and int? pos?] [:and int? neg?]]
+;; Ideally the result would be [:and int? [:or pos? neg?]]
+```
 
 ## Usage
 
