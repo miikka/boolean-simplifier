@@ -43,7 +43,7 @@ Not released; use [a git dependency with deps.edn](https://clojure.org/guides/de
 
 ## See also
 
-* [Quine-McCluskey algorithm](https://en.wikipedia.org/wiki/Quine–McCluskey_algorithm)
+* [Quine-McCluskey algorithm](https://en.wikipedia.org/wiki/Quine–McCluskey_algorithm) would be the "proper" solution
 
 ## License
 
