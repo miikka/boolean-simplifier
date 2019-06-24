@@ -17,7 +17,10 @@
   (mapcat clause->facts args))
 
 (defmethod clause->facts :or [[_ & args]]
-  [:or (into #{} (mapcat clause->facts) args)])
+  (let [args (into #{} (mapcat clause->facts) args)]
+    (if (= 1 (count args))
+      args
+      [[:or args]])))
 
 (defn add-facts [env xs]
   (into env (mapcat clause->facts) xs))
