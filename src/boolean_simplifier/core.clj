@@ -1,14 +1,18 @@
 (ns boolean-simplifier.core
+  "Simplify your Boolean expressions."
   (:require [clojure.set :as set]))
 
-(defn get-tag [x] (if (vector? x) (first x) x))
+(defn get-tag
+  "Dispatch function for Boolean expressions."
+  [x]
+  (if (vector? x) (first x) x))
 
-(defn xnot [x]
+(defn- xnot [x]
   (if (= :not (get-tag x))
     (second x)
     [:not x]))
 
-(defmulti clause->facts get-tag)
+(defmulti ^:private clause->facts get-tag)
 
 (defmethod clause->facts :default [x] [x])
 
@@ -21,13 +25,13 @@
       args
       [[:or args]])))
 
-(defn known? [env x]
+(defn- known? [env x]
   (set/subset? (into #{} (clause->facts x)) env))
 
-(defn add-facts [env xs]
+(defn- add-facts [env xs]
   (into env (mapcat clause->facts) xs))
 
-(defmulti simplify-clause (fn [_env x] (get-tag x)))
+(defmulti ^:private simplify-clause (fn [_env x] (get-tag x)))
 
 (defmethod simplify-clause :default [env x]
   (cond
@@ -57,5 +61,8 @@
       (known? env term) true
       true term)))
 
-(defn simplify [x]
+(defn simplify
+  "Given a Boolean expression x, return an equivalent but possibly simpler
+  Boolean expression."
+  [x]
   (simplify-clause #{} x))

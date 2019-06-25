@@ -1,12 +1,18 @@
 # boolean-simplifier
 
-A stupid worse-is-better library for simplifying Boolean expressions. Example:
+A worse-is-better library for simplifying Boolean expressions. Example:
 
 ```clojure
 (require '[boolean-simplifier.core :as bs])
 (bs/simplify '[:and int? [:and int? pos?]])
 ;; => [:and int? pos?]
 ```
+
+**The underlying problem:** Given a Boolean expression, find the
+fastest-to-evaluate equivalent expression.
+
+This is a complicated problem and this library does not even attempt to find the
+optimal solution. What we do here is to just remove the most obvious overlap.
 
 The input language:
 
@@ -16,7 +22,7 @@ The input language:
 * `[:not ...]` is a negation
 * Any other values are variables.
 
-It is based on the following rules:
+It is based on the following observations:
 
 * When evaluating `b` in `[:and a b]`, we know that `a` is true.
 * When evaluating `b` in `[:or a b]`, we know that `a` is false.
@@ -45,6 +51,20 @@ Not released; use [a git dependency with deps.edn](https://clojure.org/guides/de
 
 * [Quine-McCluskey algorithm](https://en.wikipedia.org/wiki/Quine–McCluskey_algorithm) would be the "proper" solution
 * [Reduced Ordered Binary Decision Diagram (ROBDD)](https://en.wikipedia.org/wiki/Binary_decision_diagram) seems useful as well
+
+## Development
+
+We use [just](https://github.com/casey/just) as a command runner and some tests use [Z3](https://github.com/Z3Prover/z3). If you're on macOS, you can install them via Homebrew:
+
+```sh
+brew install just z3
+```
+
+To run the test suite:
+
+```sh
+just test
+```
 
 ## License
 
