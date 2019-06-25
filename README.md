@@ -44,6 +44,7 @@ Not released; use [a git dependency with deps.edn](https://clojure.org/guides/de
 ## See also
 
 * [Quine-McCluskey algorithm](https://en.wikipedia.org/wiki/Quine–McCluskey_algorithm) would be the "proper" solution
+* [Reduced Ordered Binary Decision Diagram (ROBDD)](https://en.wikipedia.org/wiki/Binary_decision_diagram) seems useful as well
 
 ## License
 
