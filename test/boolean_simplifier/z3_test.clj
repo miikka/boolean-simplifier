@@ -1,5 +1,6 @@
 (ns boolean-simplifier.z3-test
-  (:require [boolean-simplifier.core :as bs]
+  (:require [backtick :refer [template]]
+            [boolean-simplifier.core :as bs]
             [clojure.java.shell :refer [sh]]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -19,35 +20,39 @@
 (defmethod collect-vars :not [[_ arg]] (collect-vars arg))
 
 (defmulti z3-expr bs/get-tag)
-(defmethod z3-expr :default [x] (str x))
-(defmethod z3-expr true [_] "true")
-(defmethod z3-expr false [_] "false")
+
+(defmethod z3-expr :default [x] (symbol x))
+(defmethod z3-expr true [_] true)
+(defmethod z3-expr false [_] false)
 
 (defmethod z3-expr :and [[_ & args]]
-  (str "(and " (str/join " " (map z3-expr args) )")"))
+  (template (and ~@(map z3-expr args))))
 
 (defmethod z3-expr :or [[_ & args]]
-  (str "(or " (str/join " " (map z3-expr args) )")"))
+  (template (or ~@(map z3-expr args))))
 
 (defmethod z3-expr :not [[_ arg]]
-  (str "(not " (z3-expr arg) ")"))
+  (template (not ~(z3-expr arg))))
 
-(defn z3-equality-check [x y]
-  (assert (set/subset? (set (collect-vars y)) (set (collect-vars x))))
+(defn z3-equality-check
+  [x y]
+  (let [vars (set (collect-vars x))]
+    (assert (set/subset? (set (collect-vars y)) vars))
+    (template
+     [~@(for [var vars]
+          (template (declare-const ~(z3-expr var) Bool)))
 
-  (doseq [var (set (collect-vars x))]
-    (println (str "(declare-const " var " Bool)")))
+      (define-fun conj1 () Bool
+        ~(z3-expr x))
 
-  (println "(define-fun conj1 () Bool")
-  (println (z3-expr x))
-  (println ")")
+      (define-fun conj2 () Bool
+        ~(z3-expr y))
 
-  (println "(define-fun conj2 () Bool")
-  (println (z3-expr y))
-  (println ")")
+      (assert (not (= conj1 conj2)))
+      (check-sat)])))
 
-  (println "(assert (not (= conj1 conj2)))")
-  (println "(check-sat)"))
+(defn z3->str [expr-vec]
+  (str/join "\n" (map str expr-vec)))
 
 (defn z3-check
   "Check using z3 that two Boolean expressions are equal."
@@ -56,12 +61,22 @@
     (.deleteOnExit tempfile)
     (with-open [file (io/writer tempfile)]
       (binding [*out* file]
-        (z3-equality-check x y)))
+        (println (z3->str (z3-equality-check x y)))))
     (let [{:keys [exit out]} (sh "z3" (.getAbsolutePath tempfile))
           result (str/trim out)]
-      (assert (zero? exit) (str exit))
-      (assert (contains? #{"sat" "unsat"} result))
-      (= "unsat" result))))
+      (if (zero? exit)
+        (do
+          (assert (zero? exit) (str exit))
+          (assert (contains? #{"sat" "unsat"} result))
+          (= "unsat" result))
+        (do
+          (println "#### GENERATED Z3 CODE ####")
+          (println (slurp (.getAbsolutePath tempfile)))
+          (println "###########################")
+          (println "#### STDOUT ####")
+          (println out)
+          (println "################")
+          false)))))
 
 (def +scalars+ (into [true false] (map #(str "var" %) (range 10))))
 

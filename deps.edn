@@ -2,7 +2,8 @@
  :aliases {:repl {:extra-deps {com.bhauman/rebel-readline {:mvn/version "0.1.4"}}
                   :main-opts  ["-m" "rebel-readline.main"]}
            :test {:extra-paths ["test"]
-                  :extra-deps  {lambdaisland/kaocha    {:mvn/version "0.0-521"}
+                  :extra-deps  {backtick               {:mvn/version "0.3.3"}
+                                lambdaisland/kaocha    {:mvn/version "0.0-521"}
                                 metosin/testit         {:mvn/version "0.4.0"}
                                 org.clojure/test.check {:mvn/version "0.10.0-alpha4"}
                                 org.clojure/spec.alpha {:mvn/version "0.2.176"}}}}}
